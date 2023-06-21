@@ -20,7 +20,7 @@ class LLM:
 
 
 class AugmentedLLM:
-    def __init__(self, model_path="./models/Wizard-Vicuna-13B-Uncensored.ggmlv3.q6_K.bin"):
+    def __init__(self, model_path="./models/Wizard-Vicuna-13B-Uncensored.ggmlv3.q4_K_M.bin"):
         self.retriever = Retriever("./wiki_mpnet_index")
         self.llm = LLM(model_path)
 
@@ -46,15 +46,17 @@ class AugmentedLLM:
         ) + "\n\n"
 
 
-    def ask(self, question):
-        if self.is_wikipedia_question(question):
-            results = self.retriever.search(question, k=3)
-            wikidocs = self.render_docs(results)
+    def ask(self, question, force_retrieval=False):
+        if force_retrieval or self.is_wikipedia_question(question):
+            relevant_paragraphs = self.retriever.search(question, k=3)
+            wikidocs = self.render_docs(relevant_paragraphs)
             prompt = self.wiki_prompt.format(question=question, wikidocs=wikidocs)
         else:
+            relevant_paragraphs = []
             prompt = self.prompt.format(question=question)
 
-        return self.llm.ask(prompt)
+        answer = self.llm.ask(prompt)
+        return answer, relevant_paragraphs
 
     def is_wikipedia_question(self, question):
         question = question.strip().split("\n")[0]

@@ -7,5 +7,5 @@ wget https://huggingface.co/datasets/olmer/wiki_mpnet_index/resolve/main/data/en
 wget https://huggingface.co/datasets/olmer/wiki_mpnet_index/resolve/main/data/en/paragraphs.zip -P ./wiki_mpnet_index/data/en/
 mkdir models
 echo "Downloading model..."
-wget https://huggingface.co/TheBloke/Wizard-Vicuna-13B-Uncensored-GGML/resolve/main/Wizard-Vicuna-13B-Uncensored.ggmlv3.q6_K.bin -P ./models/
+wget https://huggingface.co/TheBloke/Wizard-Vicuna-13B-Uncensored-GGML/resolve/main/Wizard-Vicuna-13B-Uncensored.ggmlv3.q4_K_M.bin -P ./models/
 echo "Setup complete!"
