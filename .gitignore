@@ -161,3 +161,6 @@ cython_debug/
 
 wiki_mpnet_index/
 models/
+llama.cpp/
+.vscode/
+wiki_bge_small_en_embeddings/
