@@ -3,3 +3,4 @@ numpy==1.25.0
 sentence-transformers==2.2.2
 requests==2.28.1
 gradio==3.43.1
+flask==2.3.3
