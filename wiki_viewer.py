@@ -1,3 +1,4 @@
+import sys
 import json
 import re
 import zipfile
@@ -71,6 +72,8 @@ def get_page(vec_idx):
 app = Flask(__name__)
 
 from urllib.parse import unquote
+
+
 @app.route("/")
 def hello_world():
     vec_idx = request.args.get("vec_idx")
@@ -84,8 +87,12 @@ def hello_world():
         url = ""
     else:
         markdown_page, title, url = get_page(vec_idx)
-    online_link = f"<div>Online page: <a href=\"{url}\">{unquote(url)}</a></div>" if vec_idx is not None else ""
-    style = ".markdown-body \{ width: 50%\}"
+    online_link = (
+        f'<div>Online page: <a href="{url}">{unquote(url)}</a></div>'
+        if vec_idx is not None
+        else ""
+    )
+    style = ".markdown-body { width: 50%}"
     prefix = f"""
         <!DOCTYPE html><html lang="en">
         <head>
@@ -95,8 +102,8 @@ def hello_world():
         </head>
         <body><h1>{title}</h1>{online_link}<div class="markdown-body">"""
     postfix = f"</div></body></html>"
-    return prefix + markdown(markdown_page, extensions=['toc']) + postfix
+    return prefix + markdown(markdown_page, extensions=["toc"]) + postfix
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=1380)
+    app.run(host="0.0.0.0", port=int(sys.argv[1]))

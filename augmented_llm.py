@@ -6,10 +6,9 @@ from wiki_retriever import Retriever
 
 
 class LLM:
-    def __init__(self, model_path):
-        os.popen("python wiki_viewer.py &")
-        os.popen(f"llama.cpp/server --mlock -m {model_path} -ngl 1 -t 4 --ctx-size 2048 &")
-        self.url = "http://127.0.0.1:8080/completion"
+    def __init__(self, model_path, port=8080):
+        os.popen(f"llama.cpp/server --mlock -m {model_path} --port {port} -ngl 1 -t 4 --ctx-size 2048 &")
+        self.url = f"http://127.0.0.1:{port}/completion"
 
     def create_completion(self, prompt, **kwargs):
         kwargs["prompt"] = prompt
@@ -44,9 +43,9 @@ class LLM:
 
 
 class AugmentedLLM:
-    def __init__(self, model_path):
+    def __init__(self, model_path, port=8080):
         self.retriever = Retriever("./wiki_bge_small_en_embeddings")
-        self.llm = LLM(model_path)
+        self.llm = LLM(model_path, port)
 
     def ask(
         self, question, previous="", force_retrieval=False, generate_preanswer=False
