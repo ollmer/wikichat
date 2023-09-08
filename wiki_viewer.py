@@ -13,12 +13,11 @@ archive = zipfile.ZipFile(root / "data/en/paragraphs.zip", "r")
 def get_paragraphs_by_vec_idx(vec_idx):
     chunk_id = vec_idx // 100000
     line_id = vec_idx % 100000
-    idmin = max(0, line_id - 20)
-    idmax = line_id + 20
+    idmin = max(0, line_id - 100)
+    idmax = line_id + 100
     id_set = set(range(idmin, idmax))
     paragraphs = []
     main_paragraph = None
-    print("vecid", line_id, "range", id_set)
     with archive.open(
         "enwiki_paragraphs_clean/enwiki_paragraphs_%03d.jsonl" % chunk_id
     ) as f:
@@ -41,27 +40,31 @@ def render_page(paragraphs, main_paragraph):
     for p in paragraphs:
         if p["page_id"] == page_id:
             page_paragraphs.append(p)
-    text = f"# {title}\n\n"
+    text = ""
     last_block_id = None
     last_sublock_id = None
+    last_block_title = None
     for p in page_paragraphs:
         titles, block_text = p["text"].split("\n", maxsplit=1)
         block_title = titles.split(". ", maxsplit=1)[1] if ". " in titles else ""
+        if block_title == last_block_title:
+            block_title = ""
         _, block_id, sublock_id = p["id"].split("_")
         if block_id != last_block_id or sublock_id != last_sublock_id:
             if len(block_title) > 0:
                 text += f"\n\n## {block_title}\n\n"
+                last_block_title = block_title
             else:
                 text += "\n\n"
         text += block_text
         last_block_id = block_id
         last_sublock_id = sublock_id
     text = re.sub("\n+", "\n\n", text)
-    return text, title, url
+    return "[TOC]\n\n" + text, title, url
 
 
-def get_page(line_id):
-    paragraphs, main_paragraph = get_paragraphs_by_vec_idx(line_id)
+def get_page(vec_idx):
+    paragraphs, main_paragraph = get_paragraphs_by_vec_idx(vec_idx)
     return render_page(paragraphs, main_paragraph)
 
 
@@ -70,27 +73,28 @@ app = Flask(__name__)
 from urllib.parse import unquote
 @app.route("/")
 def hello_world():
-    line_id = request.args.get("line_id")
+    vec_idx = request.args.get("vec_idx")
     try:
-        line_id = int(line_id)
+        vec_idx = int(vec_idx)
     except:
-        line_id = None
-    if line_id is None:
+        vec_idx = None
+    if vec_idx is None:
         markdown_page = "Page not found"
         title = "Page not found"
         url = ""
     else:
-        markdown_page, title, url = get_page(line_id)
-    prefix = """
+        markdown_page, title, url = get_page(vec_idx)
+    online_link = f"<div>Online page: <a href=\"{url}\">{unquote(url)}</a></div>" if vec_idx is not None else ""
+    style = ".markdown-body \{ width: 50%\}"
+    prefix = f"""
         <!DOCTYPE html><html lang="en">
         <head>
             <meta charset="utf-8">
-            <style type="text/css">.markdown-body { width: 50%}</style>
-            <title>""" + title + """</title>
+            <style type="text/css">{style}</style>
+            <title>{title}</title>
         </head>
-        <body><div class="markdown-body">"""
-    online_link = f"<div>Online page: <a href=\"{url}\">{unquote(url)}</a></div>" if line_id is not None else ""
-    postfix = f"</div>{online_link}</body></html>"
+        <body><h1>{title}</h1>{online_link}<div class="markdown-body">"""
+    postfix = f"</div></body></html>"
     return prefix + markdown(markdown_page, extensions=['toc']) + postfix
 
 

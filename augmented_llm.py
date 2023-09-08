@@ -7,6 +7,7 @@ from wiki_retriever import Retriever
 
 class LLM:
     def __init__(self, model_path):
+        os.popen("python wiki_viewer.py &")
         os.popen(f"llama.cpp/server --mlock -m {model_path} -ngl 1 -t 4 --ctx-size 2048 &")
         self.url = "http://127.0.0.1:8080/completion"
 

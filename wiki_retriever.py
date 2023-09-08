@@ -27,6 +27,7 @@ class Retriever:
             for i, l in enumerate(f):
                 if i == line_id:
                     paragraph = json.loads(l)
+                    paragraph["vec_idx"] = vec_idx
                     break
         return paragraph
 

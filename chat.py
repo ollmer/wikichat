@@ -27,8 +27,11 @@ def inference(message, history):
                 section_subtitle = section_title.split(". ", maxsplit=1)[1]
             else:
                 section_subtitle = ""
-            section_url = section_subtitle.strip().replace(" ", "_")
-            link = f"\n- [{section_title}]({doc['page_url']}#{section_url})"
+            section_url = section_subtitle.strip().lower().replace(" ", "-")
+            vec_idx = doc["vec_idx"]
+            url = f"http://127.0.0.1:1380/?vec_idx={vec_idx}#{section_url}"
+            # online_url = f"{doc['page_url']}#{section_url}"
+            link = f"\n- [{section_title}]({url})"
             if link not in links:
                 links[link] = doc_text
             else:
@@ -43,7 +46,7 @@ gr.ChatInterface(
     chatbot=gr.Chatbot(),
     textbox=gr.Textbox(placeholder="Ask my anything", container=False, scale=7),
     title="WikiChat - Chat with Wikipedia offline",
-    examples=["Are tomatoes vegetables?", "What is the superluminal speed?", "Where the next olmypics will be held?"],
+    examples=["Are tomatoes vegetables?", "What is the superluminal speed?", "Where the next olympics will be held?"],
     retry_btn="Retry",
     undo_btn="Undo",
     clear_btn="Clear",
