@@ -9,6 +9,10 @@ LLM_PORT = 8080
 CHAT_PORT = 8081
 VIEWER_PORT = 8082
 
+MODEL = "llama.cpp/models/stablebeluga-7b.Q4_K_M.gguf"
+# if you have 24GB of RAM, you can try better model:
+# MODEL = "llama.cpp/models/stable-platypus2-13b.Q4_K_M.gguf"
+
 
 def history_to_prompt(history):
     prompt = ""
@@ -60,7 +64,7 @@ def make_doc_links(docs):
 
 if __name__ == "__main__":
     os.popen(f"python wiki_viewer.py {VIEWER_PORT}")
-    llm = AugmentedLLM("llama.cpp/models/stablebeluga-7b.Q4_K_M.gguf", port=LLM_PORT)
+    llm = AugmentedLLM(MODEL, port=LLM_PORT)
     gr.ChatInterface(
         inference,
         chatbot=gr.Chatbot(),
