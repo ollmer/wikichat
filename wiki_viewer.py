@@ -1,15 +1,16 @@
-import sys
 import json
 import re
+import sys
 import zipfile
 from pathlib import Path
+from urllib.parse import unquote
 
 from flask import Flask, request
 from markdown import markdown
 
 root = Path("./wiki_bge_small_en_embeddings")
 archive = zipfile.ZipFile(root / "data/en/paragraphs.zip", "r")
-
+app = Flask(__name__)
 
 def get_paragraphs_by_vec_idx(vec_idx):
     chunk_id = vec_idx // 100000
@@ -37,15 +38,13 @@ def render_page(paragraphs, main_paragraph):
     title = main_paragraph["page_title"]
     url = main_paragraph["page_url"]
     page_id = main_paragraph["page_id"]
-    page_paragraphs = []
-    for p in paragraphs:
-        if p["page_id"] == page_id:
-            page_paragraphs.append(p)
     text = ""
     last_block_id = None
     last_sublock_id = None
     last_block_title = None
-    for p in page_paragraphs:
+    for p in paragraphs:
+        if p["page_id"] != page_id:
+            continue
         titles, block_text = p["text"].split("\n", maxsplit=1)
         block_title = titles.split(". ", maxsplit=1)[1] if ". " in titles else ""
         if block_title == last_block_title:
@@ -61,17 +60,12 @@ def render_page(paragraphs, main_paragraph):
         last_block_id = block_id
         last_sublock_id = sublock_id
     text = re.sub("\n+", "\n\n", text)
-    return "[TOC]\n\n" + text, title, url
+    return text, title, url
 
 
 def get_page(vec_idx):
     paragraphs, main_paragraph = get_paragraphs_by_vec_idx(vec_idx)
     return render_page(paragraphs, main_paragraph)
-
-
-app = Flask(__name__)
-
-from urllib.parse import unquote
 
 
 @app.route("/")
@@ -102,7 +96,7 @@ def hello_world():
         </head>
         <body><h1>{title}</h1>{online_link}<div class="markdown-body">"""
     postfix = f"</div></body></html>"
-    return prefix + markdown(markdown_page, extensions=["toc"]) + postfix
+    return prefix + markdown("[TOC]\n\n" + markdown_page, extensions=["toc"]) + postfix
 
 
 if __name__ == "__main__":
