@@ -164,3 +164,4 @@ models/
 llama.cpp/
 .vscode/
 wiki_bge_small_en_embeddings/
+.DS_Store

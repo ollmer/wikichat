@@ -9,9 +9,7 @@ LLM_PORT = 8080
 CHAT_PORT = 8081
 VIEWER_PORT = 8082
 
-MODEL = "llama.cpp/models/stablebeluga-7b.Q4_K_M.gguf"
-# if you have 24GB of RAM, you can try better model:
-# MODEL = "llama.cpp/models/stable-platypus2-13b.Q4_K_M.gguf"
+MODEL = "nous-hermes-2-solar-10.7b.Q6_K.gguf"
 
 
 def history_to_prompt(history):
